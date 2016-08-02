@@ -14,18 +14,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class User {
     private String username;
     private String password;
-    private HashMap<String, Friend> friends;
+    private HashMap<String, MessageBox> messageBoxes;
     private ReentrantReadWriteLock readWriteLock;
     
     public User() {
-        friends = new HashMap<>();
+        messageBoxes = new HashMap<>();
         readWriteLock = new ReentrantReadWriteLock();
     }
     
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        friends = new HashMap<>();
+        messageBoxes = new HashMap<>();
         readWriteLock = new ReentrantReadWriteLock();
     }
     
@@ -45,40 +45,56 @@ public class User {
         return password;
     }
     
-    public void addFriend(String id, Friend friend) {
+    public void addFriend(String id, MessageBox messageBox) {
         readWriteLock.writeLock().lock();
         try {
-            friends.put(id, friend);
+            messageBoxes.put(id, messageBox);
         } finally {
             readWriteLock.writeLock().unlock();
         }
     }
     
-    public Friend getFriend(String id) {
-        Friend f;
+    public String[] getFriends() {
+        String[] friends = new String[messageBoxes.size()];
+        int i = 0;
         readWriteLock.readLock().lock();
         try {
-            f = friends.get(id);
+            for (String f : messageBoxes.keySet()) {
+                friends[i] = f;
+                i++;
+            }
         }
         finally {
             readWriteLock.readLock().unlock();
         }
-        return f;
+        return friends;
     }
     
-    public Friend[] getFriends() {
-        Friend[] friend = new Friend[friends.size()];
+    public MessageBox getMessageBox(String id) {
+        MessageBox messageBox;
+        readWriteLock.readLock().lock();
+        try {
+            messageBox = messageBoxes.get(id);
+        }
+        finally {
+            readWriteLock.readLock().unlock();
+        }
+        return messageBox;
+    }
+    
+    public MessageBox[] getMessageBoxes() {
+        MessageBox[] m = new MessageBox[messageBoxes.size()];
         int i = 0;
         readWriteLock.readLock().lock();
         try {
-            for (String key : friends.keySet()) {
-                friend[i] = friends.get(key);
+            for (String key : messageBoxes.keySet()) {
+                m[i] = messageBoxes.get(key);
                 i++;
             }
         } finally {
             readWriteLock.readLock().unlock();
         }
-        return friend;
+        return m;
     }
     
 }

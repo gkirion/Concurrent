@@ -12,15 +12,15 @@ import java.util.Random;
  * @author george
  */
 public class Runner implements Runnable {
-    Friend friend;
+    MessageBox friend;
     
     public Runner() {}
     
-    public Runner(Friend friend) {
+    public Runner(MessageBox friend) {
         this.friend = friend;
     }
     
-    public void setFriend(Friend friend) {
+    public void setFriend(MessageBox friend) {
         this.friend = friend;
     }
 

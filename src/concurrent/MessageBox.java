@@ -14,18 +14,24 @@ import java.util.logging.Logger;
  *
  * @author george
  */
-public class Friend {
+public class MessageBox {
     private ArrayList<Message> messages;
     private Semaphore readersLock, writersLock;
     private ReentrantReadWriteLock readWriteLock;
     private int readers;
+    private ArrayList<MessageListener> listeners;
     
-    public Friend() {
+    public MessageBox() {
         messages = new ArrayList<>();
         readersLock = new Semaphore(1);
         writersLock = new Semaphore(1);
         readWriteLock = new ReentrantReadWriteLock();
         readers = 0;
+        listeners = new ArrayList();
+    }
+    
+    public void addMessageListener(MessageListener listener) {
+        listeners.add(listener);
     }
     
    
@@ -50,8 +56,8 @@ public class Friend {
     // readwrite lock loop 1000 2s
     
     public void addMessage(Message message) {
+        readWriteLock.writeLock().lock();
         try {
-            readWriteLock.writeLock().lock();
             messages.add(message);
             /*try {
               //  writersLock.acquire();
@@ -69,6 +75,9 @@ public class Friend {
         finally {
             //writersLock.release();
             readWriteLock.writeLock().unlock();
+        }
+        for (MessageListener o : listeners) {
+            o.messageAdded();
         }
     }
     
@@ -98,17 +107,18 @@ public class Friend {
         finally {
             readersLock.release();
         }*/
-        
+        int size = messages.size();
+        Message[] m = new Message[size];
         readWriteLock.readLock().lock();
-        
         try {
-            Thread.sleep(1);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Friend.class.getName()).log(Level.SEVERE, null, ex);
+            for (int i = 0; i < size; i++) {
+                m[i] = messages.get(i);
+            }    
         }
-        
-        readWriteLock.readLock().unlock();
-        return null;
+        finally {
+            readWriteLock.readLock().unlock();
+        }
+        return m;
         
         /*
         try {
